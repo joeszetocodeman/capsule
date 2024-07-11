@@ -8,7 +8,7 @@ use function Pest\Laravel\options;
 
 class Capsule
 {
-    use ResolveParams;
+    use ResolveParams, WithHalt;
     protected $data = [];
 
     protected array $callbacks = [];
@@ -47,12 +47,17 @@ class Capsule
     {
         $this->data['capsule'] = $this;
         $this->data['set'] = $this->set(...);
+        $this->data['halt'] = $this->halt(...);
         return $this->data;
     }
 
     public function thenReturn(\Closure|string $callback)
     {
         $this->run();
+
+        if ( $this->hasHalt() ) {
+            return $this->getHalt();
+        }
 
         if ( is_string($callback) ) {
             return $this->get($callback);
@@ -63,8 +68,11 @@ class Capsule
 
     public function run()
     {
-        foreach ($this->callbacks as $callback) {
-            $this->evaluate($callback);
+        try {
+            foreach ($this->callbacks as $callback) {
+                $this->evaluate($callback);
+            }
+        } catch(Halt $e) {
         }
         return $this;
     }
@@ -142,5 +150,6 @@ class Capsule
         }
         return $this;
     }
+
 }
 

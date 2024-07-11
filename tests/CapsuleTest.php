@@ -2,6 +2,7 @@
 
 
 use JoeSzeto\Capsule\Capsule;
+use JoeSzeto\Capsule\Halt;
 use JoeSzeto\Capsule\OnBlank;
 use function JoeSzeto\Capsule\capsule;
 
@@ -131,4 +132,17 @@ test('attribute', function () {
         ->thenReturn(
             fn($bar) => expect($bar)->toBeNull()
         );
+} );
+
+test('halt', function () {
+    $response = capsule()
+        ->through(
+            fn(Closure $halt) => $halt('yoo'),
+            fn() => throw new Exception('hi')
+        )
+        ->thenReturn(
+            fn($bar) => expect($bar)->toBeNull()
+        );
+
+    expect($response)->toBe('yoo');
 } );
