@@ -1,6 +1,8 @@
 <?php
 
 
+use JoeSzeto\Capsule\Capsule;
+use JoeSzeto\Capsule\OnBlank;
 use function JoeSzeto\Capsule\capsule;
 
 test('work', function () {
@@ -69,3 +71,64 @@ test('work', function () {
             fn( string $foo ) => expect($foo)->toBe('abc')
         );
 });
+
+test('proxy', function() {
+    capsule()
+        ->set('foo', 'foo')
+        ->onBlank('foo')
+        ->set('foo', fn() => 'bar')
+        ->thenReturn(
+            fn( string $foo ) => expect($foo)->toBe('foo')
+        );
+
+    capsule()
+        ->onNull('foo')
+        ->set('foo', fn() => 'bar')
+        ->thenReturn(
+            fn( string $foo ) => expect($foo)->toBe('bar')
+        );
+} );
+
+test('call', function () {
+    expect(
+        capsule()->call('foo'))->toBe('foo');
+    expect(capsule()->call(fn() => 'foo'))->toBe('foo');
+
+   capsule()
+        ->set('foo', 'bar')
+        ->call(fn(string $foo) => expect($foo)->toBe('bar'));
+
+    capsule()
+        ->set([
+            'foo' => '123',
+            'bar' => '456'
+        ])
+        ->call(fn(string $foo, string $b) => expect($foo)
+            ->toBe('123')
+            ->and($b)->toBe('456')
+        );
+} );
+
+test('class', function () {
+    capsule()
+        ->set('something',  new class {
+            public $abc = '123';
+        } )
+    ->call(fn($something) => expect($something->abc)->toBe('123') );
+
+    capsule()
+        ->set('something', fn() => new Capsule() )
+        ->call(fn( Capsule $something) => expect($something)->toBeInstanceOf(Capsule::class) );
+} );
+
+test('attribute', function () {
+    capsule()
+        ->set('foo', '123')
+        ->through(
+            #[OnBlank('foo')]
+            fn(string $foo, Closure $set) => $set('bar', '456')
+        )
+        ->thenReturn(
+            fn($bar) => expect($bar)->toBeNull()
+        );
+} );

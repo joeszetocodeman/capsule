@@ -69,7 +69,7 @@ class Capsule
         return $this;
     }
 
-    public function evaluate($something)
+    protected function evaluate($something)
     {
         if ( is_callable($something) ) {
             if ( $this->shouldRun($something) ) {
@@ -79,6 +79,11 @@ class Capsule
         }
 
         return $something;
+    }
+
+    public function call($something)
+    {
+        return $this->evaluate($something);
     }
 
     public function has($key): bool
@@ -112,12 +117,22 @@ class Capsule
         return true;
     }
 
-    public function onBlank($key, $value)
+    public function onBlank($key, $value = null)
     {
-        if ( (new OnBlank($key))->setCapsule($this)->isBlank() ) {
+        $onBlank = (new OnBlank($key))->setCapsule($this);
+        if (is_null($value)) {
+            return $onBlank;
+        }
+
+        if ( $onBlank->isBlank() ) {
             $this->callbacks[] = $this->evaluate($value);
         }
         return $this;
+    }
+
+    public function onNull()
+    {
+        return $this->onBlank(...func_get_args());
     }
 
     public function setOnBlank($key, $value)

@@ -29,10 +29,19 @@ class OnBlank
         }
 
         return blank(
-            $this->capsule->evaluate(
+            $this->capsule->call(
                 $this->capsule->get($this->key)
             )
         );
+    }
+
+    public function set($key, $value) : Capsule
+    {
+        if ( $this->isBlank()) {
+            return $this->capsule->set($key, $value);
+        }
+
+        return $this->capsule;
     }
 
 }
