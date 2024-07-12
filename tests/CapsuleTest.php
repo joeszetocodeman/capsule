@@ -144,6 +144,37 @@ test('attribute', function () {
         );
 });
 
+test('attribute with class methods', function () {
+
+    $class = new class {
+
+        public function run()
+        {
+            capsule()
+                ->through(
+                    #[Setter('name')]
+                    fn() => collect(),
+                    $this->setName(...),
+                    #[OnBlank('name')]
+                    fn() => throw new Exception('foo should not be run')
+                )
+                ->thenReturn('name');
+        }
+
+        #[Setter('name')]
+        protected function setName()
+        {
+            return collect([1, 2]);
+        }
+
+
+    };
+
+    $class->run();
+
+    expect(1)->toBe(1);
+});
+
 test('halt', function () {
     $response = capsule()
         ->through(
@@ -161,6 +192,7 @@ test('then return closure', function () {
     expect(capsule()
         ->set('foo', fn() => 'name')
         ->thenReturn('foo'))->toBe('name');
+
 });
 
 test('complex', function () {
