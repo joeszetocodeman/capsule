@@ -145,4 +145,10 @@ test('halt', function () {
         );
 
     expect($response)->toBe('yoo');
+});
+
+test('then return closure', function () {
+    expect(capsule()
+        ->set('foo', fn() => 'name' )
+        ->thenReturn('foo'))->toBe('name');
 } );

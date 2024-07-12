@@ -4,7 +4,6 @@ namespace JoeSzeto\Capsule;
 
 use ReflectionNamedType;
 use ReflectionParameter;
-use function Pest\Laravel\options;
 
 class Capsule
 {
@@ -60,7 +59,7 @@ class Capsule
         }
 
         if ( is_string($callback) ) {
-            return $this->get($callback);
+            return $this->evaluate($this->get($callback));
         }
 
         return $this->evaluate($callback);
