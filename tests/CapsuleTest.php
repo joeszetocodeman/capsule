@@ -164,14 +164,18 @@ test('then return closure', function () {
 });
 
 test('foo', function () {
-    expect(capsule()
-        ->through(
-            fn(Closure $set) => $set('coupons', collect(['1', '2'])),
-            fn(Closure $set, Collection $coupons) => $set('coupons', null))
-    )
-        ->onBlank('coupons', fn(Closure $set) => $set('coupons', collect(['1', '2', '3']))
+    expect(
+        capsule()
+            ->through(
+                fn(Closure $set) => $set('coupons', collect(['1', '2'])),
+                fn(Closure $set, Collection $coupons) => $set('coupons', null)
+            )
+            ->onBlank('coupons',
+                fn(Closure $set) => $set('coupons', collect(['1', '2', '3']))
+            )
             ->thenReturn('coupons')
-            ->toEqual(
-                collect(['1', '2', '3'])
-            ));
+    )
+        ->toEqual(
+            collect(['1', '2', '3'])
+        );
 });

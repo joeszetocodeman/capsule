@@ -142,7 +142,7 @@ class Capsule
         }
 
         if ( $onBlank->isBlank() ) {
-            $this->callbacks[] = $this->evaluate($value);
+            $this->callbacks[] = $value;
         }
         return $this;
     }
