@@ -29,9 +29,7 @@ class OnBlank
         }
 
         return blank(
-            $this->capsule->call(
-                $this->capsule->get($this->key)
-            )
+            $this->capsule->evaluateKey($this->key)
         );
     }
 

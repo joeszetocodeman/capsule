@@ -13,6 +13,8 @@ class Capsule
 
     protected array $callbacks = [];
 
+    protected array $cachedValues = [];
+
     public function capsule(...$callbacks): static
     {
         $this->callbacks = $callbacks;
@@ -43,6 +45,15 @@ class Capsule
         return data_get($this->getData(), $key);
     }
 
+    public function evaluateKey($key)
+    {
+        if ( ! $this->has($key) ) {
+            return null;
+        }
+
+        return $this->cachedValues[$key] ??= $this->evaluate($this->get($key));
+    }
+
     protected function getData()
     {
         $this->data['capsule'] = $this;
@@ -60,7 +71,7 @@ class Capsule
         }
 
         if ( is_string($callback) ) {
-            return $this->evaluate($this->get($callback));
+            return $this->evaluateKey($callback);
         }
 
         return $this->evaluate($callback);
