@@ -1,6 +1,7 @@
 <?php
 
 
+use Illuminate\Support\Collection;
 use JoeSzeto\Capsule\Capsule;
 use JoeSzeto\Capsule\Halt;
 use JoeSzeto\Capsule\OnBlank;
@@ -151,4 +152,16 @@ test('then return closure', function () {
     expect(capsule()
         ->set('foo', fn() => 'name' )
         ->thenReturn('foo'))->toBe('name');
+} );
+
+test('foo', function () {
+    expect(capsule()
+        ->through(
+            fn(Closure $set) => $set('coupons', collect(['1', '2']) ),
+            fn(Closure $set, Collection $coupons ) => $set('coupons', $coupons->push('3') ) )
+        )
+        ->thenReturn('coupons')
+        ->toEqual(
+            collect(['1', '2', '3'])
+            );
 } );
