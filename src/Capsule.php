@@ -8,6 +8,7 @@ use ReflectionParameter;
 class Capsule
 {
     use ResolveParams, WithHalt;
+
     protected $data = [];
 
     protected array $callbacks = [];
@@ -71,21 +72,30 @@ class Capsule
             foreach ($this->callbacks as $callback) {
                 $this->evaluate($callback);
             }
-        } catch(Halt $e) {
+        } catch (Halt $e) {
         }
         return $this;
     }
 
     protected function evaluate($something)
     {
-        if ( is_callable($something) ) {
-            if ( $this->shouldRun($something) ) {
-                return $something(...$this->resolveParams($something));
-            }
+        if ( !is_callable($something) ) {
+            return $something;
+        }
+
+        if ( !$this->shouldRun($something) ) {
             return null;
         }
 
-        return $something;
+        if ( !$this->isSetter($something) ) {
+            return $something(...$this->resolveParams($something));
+        }
+
+        return $this->set(
+            $this->resolveSetterKey($something),
+            $something(...$this->resolveParams($something))
+        );
+
     }
 
     public function call($something)
@@ -127,7 +137,7 @@ class Capsule
     public function onBlank($key, $value = null)
     {
         $onBlank = (new OnBlank($key))->setCapsule($this);
-        if (is_null($value)) {
+        if ( is_null($value) ) {
             return $onBlank;
         }
 
@@ -150,5 +160,30 @@ class Capsule
         return $this;
     }
 
+    private function isSetter(callable $something): bool
+    {
+        $reflection = new \ReflectionFunction($something);
+
+        foreach ($reflection->getAttributes() as $attribute) {
+            if ( $attribute->newInstance() instanceof Setter ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function resolveSetterKey(callable $something)
+    {
+        $reflection = new \ReflectionFunction($something);
+
+        foreach ($reflection->getAttributes() as $attribute) {
+            if ( ($setter = $attribute->newInstance()) instanceof Setter ) {
+                return $setter->getKey();
+            }
+        }
+
+        return '';
+    }
 }
 
