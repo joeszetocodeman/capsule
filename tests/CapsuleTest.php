@@ -158,10 +158,11 @@ test('foo', function () {
     expect(capsule()
         ->through(
             fn(Closure $set) => $set('coupons', collect(['1', '2']) ),
-            fn(Closure $set, Collection $coupons ) => $set('coupons', $coupons->push('3') ) )
+            fn(Closure $set, Collection $coupons ) => $set('coupons', null ) )
         )
+        ->onBlank('coupons', fn(Closure $set) => $set('coupons', collect(['1', '2', '3']) )
         ->thenReturn('coupons')
         ->toEqual(
             collect(['1', '2', '3'])
-            );
+            ));
 } );
