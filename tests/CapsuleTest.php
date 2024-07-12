@@ -163,7 +163,7 @@ test('then return closure', function () {
         ->thenReturn('foo'))->toBe('name');
 });
 
-test('foo', function () {
+test('complex', function () {
     expect(
         capsule()
             ->through(
