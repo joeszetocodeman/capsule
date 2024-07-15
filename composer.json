@@ -1,22 +1,22 @@
 {
-    "name": "joe.szeto/capsule",
-    "autoload": {
-        "psr-4": {
-            "JoeSzeto\\Capsule\\": "src/"
-        },
-        "files": [
-            "src/Functions.php"
-        ]
+  "name": "joe.szeto/capsule",
+  "autoload": {
+    "psr-4": {
+      "JoeSzeto\\Capsule\\": "src/"
     },
-    "require": {
-        "laravel/framework": "^10"
-    },
-    "require-dev": {
-        "pestphp/pest": "^2.34"
-    },
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
+    "files": [
+      "src/Functions.php"
+    ]
+  },
+  "require": {
+    "laravel/framework": ">=10"
+  },
+  "require-dev": {
+    "pestphp/pest": "^2.34"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
     }
+  }
 }
