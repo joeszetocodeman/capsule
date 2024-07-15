@@ -3,6 +3,7 @@
 
 use Illuminate\Support\Collection;
 use JoeSzeto\Capsule\Capsule;
+use JoeSzeto\Capsule\Cat;
 use JoeSzeto\Capsule\OnBlank;
 use JoeSzeto\Capsule\Setter;
 use function JoeSzeto\Capsule\capsule;
@@ -200,7 +201,7 @@ test('complex', function () {
         capsule()
             ->through(
                 fn(Closure $set) => $set('coupons', collect(['1', '2'])),
-                fn(Closure $set, Collection $coupons) => $set('coupons', null)
+                fn(Closure $set, Collection $coupons) => $set('coupons', null),
             )
             ->onBlank('coupons',
                 fn(Closure $set) => $set('coupons', collect(['1', '2', '3']))
@@ -210,4 +211,12 @@ test('complex', function () {
         ->toEqual(
             collect(['1', '2', '3'])
         );
+});
+
+test('throw', function () {
+    capsule(
+        fn() => throw new Exception('foo'),
+        #[Cat(Exception::class)]
+        fn(string $message) => expect($message)->toBe('foo')
+    )->run();
 });

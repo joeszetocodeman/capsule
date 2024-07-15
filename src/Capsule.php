@@ -11,18 +11,23 @@ class Capsule
 
     protected $data = [];
 
+    /** * @var Callback[] */
     protected array $callbacks = [];
 
     protected array $cachedValues = [];
+    private array $throwables = [];
 
     public function capsule(...$callbacks): static
     {
-        $this->callbacks = $callbacks;
-        return $this;
+        return $this->through(...$callbacks);
     }
 
     public function through(...$callbacks): static
     {
+        $callbacks = array_map(fn($callback) => is_callable($callback)
+            ? new Callback($callback, $this) : new Callback(fn() => $callback, $this),
+            $callbacks
+        );
         $this->callbacks = [...$this->callbacks, ...$callbacks];
         return $this;
     }
@@ -36,6 +41,7 @@ class Capsule
             return $this;
         }
         $this->data[$key] = $value;
+        $this->cachedValues[$key] = null;
         return $this;
     }
 
@@ -47,8 +53,12 @@ class Capsule
 
     public function evaluateKey($key)
     {
-        if ( ! $this->has($key) ) {
+        if ( !$this->has($key) ) {
             return null;
+        }
+
+        if ( is_string($this->get($key)) ) {
+            return $this->get($key);
         }
 
         return $this->cachedValues[$key] ??= $this->evaluate($this->get($key));
@@ -81,21 +91,46 @@ class Capsule
     {
         try {
             foreach ($this->callbacks as $callback) {
-                $this->evaluate($callback);
+                if ( !$callback->shouldRun() ) {
+                    continue;
+                }
+                $this->evaluate($callback->callable);
             }
         } catch (Halt $e) {
+        } catch (\Throwable $e) {
+            $this->throwables[] = $e;
         }
+
+        $unhandle = [];
+        foreach ($this->throwables as $throwable) {
+            $handled = false;
+            foreach ($this->callbacks as $callback) {
+                if ( $callback->isCatch($throwable) ) {
+                    $handled = true;
+                    $callback->handle($throwable);
+                }
+            }
+
+            if ( !$handled ) {
+                $unhandle[] = $throwable;
+            }
+        }
+
+        foreach ($unhandle as $throwable) {
+            throw $throwable;
+        }
+
         return $this;
     }
 
-    protected function evaluate($something)
+    public function evaluate(\Closure|string|null $something, array $params = [])
     {
         if ( !is_callable($something) ) {
             return $something;
         }
 
-        if ( !$this->shouldRun($something) ) {
-            return null;
+        if ( $params ) {
+            $this->set($params);
         }
 
         if ( !$this->isSetter($something) ) {
@@ -106,7 +141,6 @@ class Capsule
             $this->resolveSetterKey($something),
             $something(...$this->resolveParams($something))
         );
-
     }
 
     public function call($something)
@@ -132,19 +166,6 @@ class Capsule
         );
     }
 
-    private function shouldRun(callable $callback)
-    {
-        $reflection = new \ReflectionFunction($callback);
-        $attributes = $reflection->getAttributes();
-
-        foreach ($attributes as $attribute) {
-            if ( ($instance = $attribute->newInstance()) instanceof OnBlank ) {
-                return $instance->setCapsule($this)->isBlank();
-            }
-        }
-        return true;
-    }
-
     public function onBlank($key, $value = null)
     {
         $onBlank = (new OnBlank($key))->setCapsule($this);
@@ -153,7 +174,7 @@ class Capsule
         }
 
         if ( $onBlank->isBlank() ) {
-            $this->callbacks[] = $value;
+            $this->through($value);
         }
         return $this;
     }
