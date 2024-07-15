@@ -98,32 +98,22 @@ class Capsule
             }
         } catch (Halt $e) {
         } catch (\Throwable $e) {
-            $this->throwables[] = $e;
-        }
-
-        $unhandle = [];
-        foreach ($this->throwables as $throwable) {
-            $handled = false;
             foreach ($this->callbacks as $callback) {
-                if ( $callback->isCatch($throwable) ) {
+                $handled = false;
+                if ( $callback->isCatch($e) ) {
                     $handled = true;
-                    $callback->handle($throwable);
+                    $callback->handle($e);
                 }
             }
-
             if ( !$handled ) {
-                $unhandle[] = $throwable;
+                throw $e;
             }
-        }
-
-        foreach ($unhandle as $throwable) {
-            throw $throwable;
         }
 
         return $this;
     }
 
-    public function evaluate(\Closure|string|null $something, array $params = [])
+    public function evaluate($something, array $params = [])
     {
         if ( !is_callable($something) ) {
             return $something;

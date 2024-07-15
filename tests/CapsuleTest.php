@@ -179,20 +179,34 @@ test('attribute with class methods', function () {
 test('halt', function () {
     $response = capsule()
         ->through(
-            fn(Closure $halt) => $halt('yoo'),
+            fn(Closure $halt) => $halt(collect()),
             fn() => throw new Exception('hi')
         )
         ->thenReturn(
             fn($bar) => expect($bar)->toBeNull()
         );
 
-    expect($response)->toBe('yoo');
+    expect($response)->toEqual(collect());
+});
+
+test('halt collection', function () {
+    expect(capsule()
+        ->through(
+            #[Setter('foo')]
+            fn(Closure $halt) => $halt(collect([1, 2, 3])),
+        )
+        ->thenReturn('foo'))->toEqual(collect([1, 2, 3]));
 });
 
 test('then return closure', function () {
     expect(capsule()
         ->set('foo', fn() => 'name')
-        ->thenReturn('foo'))->toBe('name');
+        ->thenReturn('foo'))->toBe('name')
+        ->and(
+            capsule()
+                ->set('foo', collect([1]))
+                ->thenReturn('foo'))
+        ->toEqual(collect([1]));
 
 });
 
