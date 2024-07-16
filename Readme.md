@@ -33,3 +33,13 @@ $name = capsule()
     ->set('name', 'szeto')
     ->thenReturn(fn(string $myName) => $myName);
 ```
+
+## OnBlank
+```php
+$name = capsule()
+    ->set('name', fn() => null)
+    ->through(
+        #[OnBlank('name'), Setter('name')]
+        fn() => 'szeto' // this closure only call when the value of 'name' is null
+    )->thenReturn('name');
+```

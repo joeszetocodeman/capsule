@@ -1,5 +1,6 @@
 <?php
 
+use JoeSzeto\Capsule\OnBlank;
 use JoeSzeto\Capsule\Setter;
 use function JoeSzeto\Capsule\capsule;
 
@@ -37,5 +38,15 @@ test('guess name', function () {
     $name = capsule()
         ->set('name', 'szeto')
         ->thenReturn(fn(string $myName) => $myName);
+    expect($name)->toBe('szeto');
+} );
+
+test('on blank', function () {
+    $name = capsule()
+        ->set('name', fn() => null)
+        ->through(
+            #[OnBlank('name'), Setter('name')]
+            fn() => 'szeto'
+        )->thenReturn('name');
     expect($name)->toBe('szeto');
 } );
