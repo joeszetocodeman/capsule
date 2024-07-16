@@ -4,6 +4,7 @@
 use Illuminate\Support\Collection;
 use JoeSzeto\Capsule\Capsule;
 use JoeSzeto\Capsule\Cat;
+use JoeSzeto\Capsule\Evaluable;
 use JoeSzeto\Capsule\OnBlank;
 use JoeSzeto\Capsule\Setter;
 use function JoeSzeto\Capsule\capsule;
@@ -234,3 +235,12 @@ test('throw', function () {
         fn(string $message) => expect($message)->toBe('foo')
     )->run();
 });
+
+test('evaluable', function () {
+
+    capsule()
+        ->set('foo', 'bar')
+        ->set('bob', fn(string $foo) => expect($foo)->toBe('bar'))
+        ->thenReturn(fn(Evaluable $bob) => $bob());
+});
+
