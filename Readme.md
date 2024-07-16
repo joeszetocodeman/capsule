@@ -1,8 +1,7 @@
 
 ## Basic usage
 
-Setter is a function that returns a value,
-and the value is passed to the next setter function as an argument.
+Setter 
 ```php
 $me = capsule(
     #[Setter('name')]
