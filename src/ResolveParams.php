@@ -33,7 +33,7 @@ trait ResolveParams
         $parameterName = $this->resolveByTypeOrClassName($param);
 
         if ( $this->has($parameterName) ) {
-            return $this->evaluate(($this->get($parameterName)));
+            return $this->evaluateKey($parameterName);
         }
 
         if ( filled($parameterName) ) {
@@ -57,7 +57,7 @@ trait ResolveParams
             return $className;
         }
 
-        return $parameter->getType()->getName();
+        return $parameter->getName();
     }
 
     /**
@@ -67,16 +67,17 @@ trait ResolveParams
     public function resolveByName(ReflectionParameter $param): mixed
     {
         $parameterName = $param->getName();
-        if ( !is_callable($this->get($parameterName)) ) {
-            return $this->get($parameterName);
+        $value = $this->get($parameterName);
+        if ( !is_callable($value) ) {
+            return $value;
         }
         if ( $param->getType()?->getName() === Evaluable::class ) {
             return new Evaluable(fn() => $this->evaluate($this->get($parameterName)));
         }
         if ( $param->getType()?->getName() === 'Closure' ) {
-            return $this->get($parameterName);
+            return $value;
         }
-        return $this->evaluate($this->get($parameterName));
+        return $this->evaluateKey($parameterName);
     }
 
     /**
