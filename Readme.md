@@ -1,7 +1,8 @@
 
 ## Basic usage
 
-Setter 
+we can use attribute ``` Setter ``` to tell the code
+the following Closure is a setter, and the value of the setter is the return value of the closure
 ```php
 $me = capsule(
     #[Setter('name')]
@@ -14,7 +15,7 @@ $me = capsule(
 // to be ['szeto', 30, 'man']
 ```
 
-set function 
+we can also use method ``` set ``` to set the value of the setter
 ```php
 $me = capsule()
     ->set('name', fn() => 'szeto')
