@@ -6,7 +6,7 @@ trait WithHalt
 {
     private $halt;
 
-    private function hasHalt() : bool
+    private function hasHalt(): bool
     {
         return !is_null($this->halt);
     }
@@ -19,7 +19,8 @@ trait WithHalt
     /**
      * @throws Halt
      */
-    public function halt($value = null) {
+    public function halt($value = null)
+    {
         $this->halt = $value;
         throw new Halt($value);
     }

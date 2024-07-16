@@ -5,7 +5,7 @@ namespace JoeSzeto\Capsule;
 #[\Attribute]
 class Setter
 {
-    protected Capsule $capsule;
+    use WithCapsule;
 
     public function __construct(protected string $key)
     {

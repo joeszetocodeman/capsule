@@ -22,6 +22,10 @@ trait ResolveParams
     {
         $parameterName = $param->getName();
 
+        if ( $this->has($param->getType()?->getName()) ) {
+            return $this->evaluateKey($param->getType()->getName());
+        }
+
         if ( $this->has($parameterName) ) {
             return $this->resolveByName($param);
         }
@@ -29,7 +33,7 @@ trait ResolveParams
         $parameterName = $this->resolveByTypeOrClassName($param);
 
         if ( $this->has($parameterName) ) {
-            return value($this->get($parameterName));
+            return $this->evaluate(($this->get($parameterName)));
         }
 
         if ( filled($parameterName) ) {
@@ -55,6 +59,7 @@ trait ResolveParams
 
         return $parameter->getType()->getName();
     }
+
     /**
      * @param  ReflectionParameter  $param
      * @return array|mixed|null
@@ -62,14 +67,16 @@ trait ResolveParams
     public function resolveByName(ReflectionParameter $param): mixed
     {
         $parameterName = $param->getName();
-        if ( is_callable($this->get($parameterName)) ) {
-            if ( $param->getType()?->getName() === 'Closure' ) {
-                return $this->get($parameterName);
-            } else {
-                return $this->evaluate($this->get($parameterName));
-            }
+        if ( !is_callable($this->get($parameterName)) ) {
+            return $this->get($parameterName);
         }
-        return $this->get($parameterName);
+        if ( $param->getType()?->getName() === Evaluable::class ) {
+            return new Evaluable(fn() => $this->evaluate($this->get($parameterName)));
+        }
+        if ( $param->getType()?->getName() === 'Closure' ) {
+            return $this->get($parameterName);
+        }
+        return $this->evaluate($this->get($parameterName));
     }
 
     /**
@@ -97,6 +104,10 @@ trait ResolveParams
     {
         $response = [];
         foreach ($this->getData() as $key => $value) {
+            if ( $key === $parameter->getType()->getName() ) {
+                $response[] = $key;
+                continue;
+            }
             if ( is_object($value) && get_class($value) === $parameter->getType()->getName() ) {
                 $response[] = $key;
             }
@@ -127,4 +138,6 @@ trait ResolveParams
 
         return $closestMatch;
     }
+
+
 }

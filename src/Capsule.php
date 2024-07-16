@@ -11,22 +11,30 @@ class Capsule
 
     protected $data = [];
 
+    /** * @var Callback[] */
     protected array $callbacks = [];
 
     protected array $cachedValues = [];
+    private array $throwables = [];
 
     public function capsule(...$callbacks): static
     {
-        $this->callbacks = $callbacks;
-        return $this;
+        return $this->through(...$callbacks);
     }
 
     public function through(...$callbacks): static
     {
+        $callbacks = array_map(fn($callback) => is_callable($callback)
+            ? new Callback($callback, $this) : new Callback(fn() => $callback, $this),
+            $callbacks
+        );
         $this->callbacks = [...$this->callbacks, ...$callbacks];
         return $this;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function set(string|array $key, $value = null): static
     {
         if ( is_array($key) ) {
@@ -35,7 +43,9 @@ class Capsule
             }
             return $this;
         }
+        $this->throwIfExistType($key);
         $this->data[$key] = $value;
+        $this->cachedValues[$key] = null;
         return $this;
     }
 
@@ -47,8 +57,12 @@ class Capsule
 
     public function evaluateKey($key)
     {
-        if ( ! $this->has($key) ) {
+        if ( !$this->has($key) ) {
             return null;
+        }
+
+        if ( is_string($this->get($key)) ) {
+            return $this->get($key);
         }
 
         return $this->cachedValues[$key] ??= $this->evaluate($this->get($key));
@@ -81,32 +95,43 @@ class Capsule
     {
         try {
             foreach ($this->callbacks as $callback) {
+                if ( !$callback->shouldRun() ) {
+                    continue;
+                }
                 $this->evaluate($callback);
             }
         } catch (Halt $e) {
+        } catch (\Throwable $e) {
+            foreach ($this->callbacks as $callback) {
+                $handled = false;
+                if ( $callback->isCatch($e) ) {
+                    $handled = true;
+                    $callback->handle($e);
+                }
+            }
+            if ( !$handled ) {
+                throw $e;
+            }
         }
+
         return $this;
     }
 
-    protected function evaluate($something)
+    public function evaluate($something, array $params = [])
     {
+        if ( $something instanceof Callback ) {
+            return $something->evaluate();
+        }
+
         if ( !is_callable($something) ) {
             return $something;
         }
 
-        if ( !$this->shouldRun($something) ) {
-            return null;
+        if ( $params ) {
+            $this->set($params);
         }
 
-        if ( !$this->isSetter($something) ) {
-            return $something(...$this->resolveParams($something));
-        }
-
-        return $this->set(
-            $this->resolveSetterKey($something),
-            $something(...$this->resolveParams($something))
-        );
-
+        return $something(...$this->resolveParams($something));
     }
 
     public function call($something)
@@ -132,19 +157,6 @@ class Capsule
         );
     }
 
-    private function shouldRun(callable $callback)
-    {
-        $reflection = new \ReflectionFunction($callback);
-        $attributes = $reflection->getAttributes();
-
-        foreach ($attributes as $attribute) {
-            if ( ($instance = $attribute->newInstance()) instanceof OnBlank ) {
-                return $instance->setCapsule($this)->isBlank();
-            }
-        }
-        return true;
-    }
-
     public function onBlank($key, $value = null)
     {
         $onBlank = (new OnBlank($key))->setCapsule($this);
@@ -153,7 +165,7 @@ class Capsule
         }
 
         if ( $onBlank->isBlank() ) {
-            $this->callbacks[] = $value;
+            $this->through($value);
         }
         return $this;
     }
@@ -171,30 +183,21 @@ class Capsule
         return $this;
     }
 
-    private function isSetter(callable $something): bool
+    /**
+     * @param  string  $key
+     * @return void
+     * @throws \Exception
+     */
+    public function throwIfExistType(string $key): void
     {
-        $reflection = new \ReflectionFunction($something);
-
-        foreach ($reflection->getAttributes() as $attribute) {
-            if ( $attribute->newInstance() instanceof Setter ) {
-                return true;
-            }
+        if (! class_exists($key) ) {
+            return;
         }
-
-        return false;
+        if ( $this->has($key) ) {
+            throw new \Exception("Duplicate key type: $key");
+        }
     }
 
-    private function resolveSetterKey(callable $something)
-    {
-        $reflection = new \ReflectionFunction($something);
 
-        foreach ($reflection->getAttributes() as $attribute) {
-            if ( ($setter = $attribute->newInstance()) instanceof Setter ) {
-                return $setter->getKey();
-            }
-        }
-
-        return '';
-    }
 }
 

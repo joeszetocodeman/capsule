@@ -211,3 +211,13 @@ test('complex', function () {
             collect(['1', '2', '3'])
         );
 });
+
+test('nullable', function () {
+    capsule()
+        ->through(
+            #[Setter('foo')]
+            fn() => null
+        )
+        ->thenReturn(fn(?Collection $foo) => expect($foo)->toBeNull());
+} );
+
