@@ -25,6 +25,8 @@ $me = capsule()
 ```
 
 ## Auto resolve params
+if the closure has type hints and the type hint is the same as the value of the setter, the value will be resolved automatically 
+even if the params name is not 100% match, it will still work
 ```php
 $name = capsule()
     ->set('name', 'szeto')
