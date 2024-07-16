@@ -23,3 +23,10 @@ $me = capsule()
     ->thenReturn(fn(string $name, int $age, string $sex) => [ $name, $age, $sex ]);
 // to be ['szeto', 30, 'man']
 ```
+
+## Auto resolve params
+```php
+$name = capsule()
+    ->set('name', 'szeto')
+    ->thenReturn(fn(string $myName) => $myName);
+```
