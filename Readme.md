@@ -51,6 +51,18 @@ $name = capsule()
     )->thenReturn('name');
 ```
 
+we can also use attribute ``` SetOnBlank ``` to set and detect the OnBlank at the same time
+
+```php
+ $name = capsule()
+        ->set('name', fn() => null)
+        ->through(
+            #[SetOnBlank('name')]
+            fn() => 'szeto'
+        )
+        ->thenReturn('name');
+```
+
 we can also use method ``` setOnBlank ``` to set the OnBlank
 
 ```php

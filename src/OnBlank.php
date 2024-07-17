@@ -2,8 +2,10 @@
 
 namespace JoeSzeto\Capsule;
 
+use JoeSzeto\Capsule\contracts\OnBlankInterface;
+
 #[\Attribute]
-class OnBlank
+class OnBlank implements OnBlankInterface
 {
     protected Capsule $capsule;
 
@@ -33,9 +35,9 @@ class OnBlank
         );
     }
 
-    public function set($key, $value) : Capsule
+    public function set($key, $value): Capsule
     {
-        if ( $this->isBlank()) {
+        if ( $this->isBlank() ) {
             return $this->capsule->set($key, $value);
         }
 

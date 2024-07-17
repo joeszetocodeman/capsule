@@ -2,6 +2,8 @@
 
 namespace JoeSzeto\Capsule;
 
+use JoeSzeto\Capsule\contracts\OnBlankInterface;
+use JoeSzeto\Capsule\contracts\SetterInterface;
 use Throwable;
 
 class Callback
@@ -48,7 +50,7 @@ class Callback
 
     public function isSetter()
     {
-        if ( $this->findAttributes(Setter::class) ) {
+        if ( $this->findAttributes(SetterInterface::class) ) {
             return true;
         }
         return false;
@@ -56,7 +58,7 @@ class Callback
 
     public function setterKey()
     {
-        $setter = $this->findAttributes(Setter::class);
+        $setter = $this->findAttributes(SetterInterface::class);
         return $setter->getKey();
     }
 
@@ -74,7 +76,7 @@ class Callback
             return false;
         }
 
-        if ( $onblank = $this->findAttributes(OnBlank::class) ) {
+        if ( $onblank = $this->findAttributes(OnBlankInterface::class) ) {
             return $onblank->isBlank();
         }
 

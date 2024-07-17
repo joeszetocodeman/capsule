@@ -1,6 +1,7 @@
 <?php
 
 use JoeSzeto\Capsule\OnBlank;
+use JoeSzeto\Capsule\SetOnBlank;
 use JoeSzeto\Capsule\Setter;
 use function JoeSzeto\Capsule\capsule;
 
@@ -55,6 +56,17 @@ test('set on blank', function () {
     $name = capsule()
         ->set('name', fn() => null)
         ->setOnBlank('name', fn() => 'szeto')
+        ->thenReturn('name');
+    expect($name)->toBe('szeto');
+});
+
+test('set on blank attribute', function () {
+    $name = capsule()
+        ->set('name', fn() => null)
+        ->through(
+            #[SetOnBlank('name')]
+            fn() => 'szeto'
+        )
         ->thenReturn('name');
     expect($name)->toBe('szeto');
 });
