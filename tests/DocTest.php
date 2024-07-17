@@ -12,9 +12,9 @@ test('base usage', function () {
         fn() => 30,
         #[Setter('sex')]
         fn() => 'man'
-    )->thenReturn( fn(string $name, int $age, string $sex) => [ $name, $age, $sex ]);
+    )->thenReturn(fn(string $name, int $age, string $sex) => [$name, $age, $sex]);
     expect($me)->toBe(['szeto', 30, 'man']);
-} );
+});
 
 test('set function', function () {
     $me = capsule()
@@ -28,18 +28,18 @@ test('set function', function () {
 test('auto resolve closure params', function () {
     $name = capsule()
         ->set('name', fn() => 'szeto')
-        ->through( function (string $name) {
+        ->through(function (string $name) {
             return $name; // szeto
         })->thenReturn(fn(string $name) => $name);
     expect($name)->toBe('szeto');
-} );
+});
 
 test('guess name', function () {
     $name = capsule()
         ->set('name', 'szeto')
         ->thenReturn(fn(string $myName) => $myName);
     expect($name)->toBe('szeto');
-} );
+});
 
 test('on blank', function () {
     $name = capsule()
@@ -49,4 +49,12 @@ test('on blank', function () {
             fn() => 'szeto'
         )->thenReturn('name');
     expect($name)->toBe('szeto');
-} );
+});
+
+test('set on blank', function () {
+    $name = capsule()
+        ->set('name', fn() => null)
+        ->setOnBlank('name', fn() => 'szeto')
+        ->thenReturn('name');
+    expect($name)->toBe('szeto');
+});
