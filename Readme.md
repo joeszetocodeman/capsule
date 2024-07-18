@@ -127,3 +127,34 @@ capsule()
         fn(Evaluable $name) => $name() // params is Joe
     );
 ```
+
+### Mocking
+
+The Capsule::mock method allows developers to replace parts of their application's behavior with predetermined responses
+or operations.
+This is particularly useful in testing, where you want to isolate the part of the application you are testing and
+control its interactions with external dependencies.
+
+```php
+public static function mock(string $key, mixed $value): void
+```
+
+To replace a string value within the capsule, simply pass the key and the new string value to the mock method.
+
+```php
+Capsule::mock('name', 'szeto');
+```
+
+If you need to mock the behavior of a function, provide a closure as the second argument. This closure will be executed
+in place of the original function associated with the given key.
+
+```php
+Capsule::mock('name', fn() => 'szeto');
+```
+
+To mock an object, pass an instance of the class as the second argument. This instance will replace any existing
+instances bound to the specified key within the capsule.
+
+```php
+Capsule::mock('name', new OnBlank('szeto'));
+```

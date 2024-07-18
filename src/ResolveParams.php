@@ -67,6 +67,12 @@ trait ResolveParams
     public function resolveByName(ReflectionParameter $param): mixed
     {
         $parameterName = $param->getName();
+
+        if ( $this->hasMock($parameterName) ) {
+            return $this->getMock($parameterName);
+        }
+
+
         $value = $this->get($parameterName);
         if ( !is_callable($value) ) {
             return $value;

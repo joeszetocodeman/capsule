@@ -44,4 +44,9 @@ class OnBlank implements OnBlankInterface
         return $this->capsule;
     }
 
+    public function getKey(): string
+    {
+        return $this->key;
+    }
+
 }

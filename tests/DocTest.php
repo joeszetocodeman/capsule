@@ -90,3 +90,32 @@ test('Evaluable', function () {
             fn(Evaluable $something) => $something()
         );
 });
+
+describe('mock', function () {
+    test('mock string', function () {
+        Capsule::mock('name', 'szeto');
+        capsule()
+            ->set('name', fn() => 'someone')
+            ->through(
+                fn(string $name) => expect($name)->toBe('szeto')
+            )->run();
+    });
+
+    test('mock function', function () {
+        Capsule::mock('name', fn() => 'szeto');
+        capsule()
+            ->set('name', fn() => 'someone')
+            ->through(
+                fn(Closure $name) => expect($name())->toBe('szeto')
+            )->run();
+    });
+
+    test('mock class', function () {
+        Capsule::mock('name', new OnBlank('szeto'));
+        capsule()
+            ->set('name', new OnBlank('someone'))
+            ->through(
+                fn(OnBlank $name) => expect($name->getKey())->toBe('szeto')
+            )->run();
+    });
+});

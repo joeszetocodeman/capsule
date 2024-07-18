@@ -9,6 +9,7 @@ class Capsule
 {
     use ResolveParams, WithHalt;
 
+    private static $mocks = [];
     protected $data = [];
 
     /** * @var Callback[] */
@@ -16,6 +17,22 @@ class Capsule
 
     protected array $cachedValues = [];
     private array $throwables = [];
+
+    public static function mock($key, $value)
+    {
+        static::$mocks[$key] = $value;
+    }
+
+    public static function hasMock($key)
+    {
+        return array_key_exists($key, static::$mocks);
+    }
+
+    public static function getMock($key)
+    {
+        return static::$mocks[$key];
+    }
+
 
     public function capsule(...$callbacks): static
     {
@@ -57,6 +74,10 @@ class Capsule
 
     public function evaluateKey($key)
     {
+        if ( $this->hasMock($key) ) {
+            return $this->getMock($key);
+        }
+
         if ( !$this->has($key) ) {
             return null;
         }
@@ -190,7 +211,7 @@ class Capsule
      */
     public function throwIfExistType(string $key): void
     {
-        if (! class_exists($key) ) {
+        if ( !class_exists($key) ) {
             return;
         }
         if ( $this->has($key) ) {
