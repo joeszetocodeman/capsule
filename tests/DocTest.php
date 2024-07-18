@@ -1,5 +1,7 @@
 <?php
 
+use JoeSzeto\Capsule\Capsule;
+use JoeSzeto\Capsule\Evaluable;
 use JoeSzeto\Capsule\OnBlank;
 use JoeSzeto\Capsule\SetOnBlank;
 use JoeSzeto\Capsule\Setter;
@@ -69,4 +71,22 @@ test('set on blank attribute', function () {
         )
         ->thenReturn('name');
     expect($name)->toBe('szeto');
+});
+
+test('Closure', function () {
+    $name = capsule()
+        ->set('name', fn() => 'szeto')
+        ->thenReturn(fn(Closure $name) => $name());
+    expect($name)->toBe('szeto');
+});
+
+test('Evaluable', function () {
+    capsule()
+        ->set('name', fn() => 'szeto')
+        ->set('something', function (string $name) {
+            expect($name)->toBe('szeto');
+        })
+        ->thenReturn(
+            fn(Evaluable $something) => $something()
+        );
 });

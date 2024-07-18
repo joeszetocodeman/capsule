@@ -71,3 +71,53 @@ $name = capsule()
     ->setOnBlank('name', fn() => 'szeto')
     ->thenReturn('name');
 ```
+
+### Closure
+
+if the set value is a closure,
+when the type hint of the param of using is Closure
+the original closure will be passed to the param
+
+```php
+    $name = capsule()
+        ->set('name', fn() => 'szeto')
+        ->thenReturn(fn(Closure $name) => $name());
+    expect($name)->toBe('szeto');
+```
+
+when the type hint of the params is a NOT closure,
+the value will be return
+
+```php
+    $name = capsule()
+        ->set('name', fn() => 'szeto')
+        ->thenReturn(
+            fn(string $name) => $name // now name is szeto, not a closure
+        );
+    expect($name)->toBe('szeto');
+```
+
+### Evaluable
+
+if the type is closure, and call it we have to pass the params manually
+
+```php
+    $name = capsule()
+        ->set('prefix', fn() => 'Joe')
+        ->set('name', fn(string $prefix) => $prefix. ' szeto')
+        ->thenReturn(
+            fn(Closure $name, string $prefix) => $name($prefix) // params is Joe
+        );
+```
+
+but if we pass the param one by one manually it will be very tedious
+now Evaluable become handy
+
+```php
+capsule()
+    ->set('prefix', fn() => 'Joe')
+    ->set('name', fn(string $prefix) => $prefix. ' szeto')
+    ->thenReturn(
+        fn(Evaluable $name) => $name() // params is Joe
+    );
+```
