@@ -1,3 +1,9 @@
+## Install
+
+```
+composer require joe.szeto/capsule
+```
+
 ## Basic usage
 
 we can use attribute ``` Setter ``` to tell the code
