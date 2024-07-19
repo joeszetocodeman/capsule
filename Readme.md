@@ -168,3 +168,16 @@ instances bound to the specified key within the capsule.
 ```php
 Capsule::mock('name', new OnBlank('szeto'));
 ```
+
+Mock with sequence
+
+```php
+Capsule::mock(OnBlank::class, new Sequence(
+    new OnBlank('szeto'), new OnBlank('joe')
+));
+capsule()
+    ->through(
+        fn(OnBlank $name) => expect($name->getKey())->toBe('szeto'),
+        fn(OnBlank $name) => expect($name->getKey())->toBe('joe')
+    )->run();
+```

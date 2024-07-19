@@ -2,6 +2,7 @@
 
 namespace JoeSzeto\Capsule;
 
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use ReflectionNamedType;
 use ReflectionParameter;
 
@@ -18,6 +19,11 @@ class Capsule
     protected array $cachedValues = [];
     private array $throwables = [];
 
+    public static function reset()
+    {
+        static::$mocks = [];
+    }
+
     public static function mock($key, $value)
     {
         static::$mocks[$key] = $value;
@@ -28,9 +34,18 @@ class Capsule
         return array_key_exists($key, static::$mocks);
     }
 
-    public static function getMock($key)
+    public static function getMock($key, bool $raw = false)
     {
-        return static::$mocks[$key];
+        if ( $raw ) {
+            return static::$mocks[$key];
+        }
+
+        $value = value(static::$mocks[$key]);
+        if ( $value instanceof Sequence ) {
+            return $value();
+        }
+
+        return $value;
     }
 
 
@@ -89,7 +104,7 @@ class Capsule
         return $this->cachedValues[$key] ??= $this->evaluate($this->get($key));
     }
 
-    protected function getData()
+    public function getData()
     {
         $this->data['capsule'] = $this;
         $this->data['set'] = $this->set(...);

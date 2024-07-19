@@ -2,6 +2,12 @@
 
 namespace JoeSzeto\Capsule;
 
+use JoeSzeto\Capsule\ParamResolvers\Container;
+use JoeSzeto\Capsule\ParamResolvers\MockName;
+use JoeSzeto\Capsule\ParamResolvers\MockType;
+use JoeSzeto\Capsule\ParamResolvers\Name;
+use JoeSzeto\Capsule\ParamResolvers\Pipeline;
+use JoeSzeto\Capsule\ParamResolvers\Type;
 use ReflectionNamedType;
 use ReflectionParameter;
 
@@ -20,45 +26,18 @@ trait ResolveParams
 
     private function resolveParam(\ReflectionParameter $param)
     {
-        $parameterName = $param->getName();
-
-        if ( $this->has($param->getType()?->getName()) ) {
-            return $this->evaluateKey($param->getType()->getName());
-        }
-
-        if ( $this->has($parameterName) ) {
-            return $this->resolveByName($param);
-        }
-
-        $parameterName = $this->resolveByTypeOrClassName($param);
-
-        if ( $this->has($parameterName) ) {
-            return $this->evaluateKey($parameterName);
-        }
-
-        if ( filled($parameterName) ) {
-            return app()->make($param->getType()->getName());
-        }
+        return (new Pipeline)->send($param)
+            ->through(
+                [
+                    new MockName($this),
+                    new MockType($this),
+                    new Name($this),
+                    new Type($this),
+                    new Container($this)
+                ]
+            )->thenReturn();
     }
 
-    protected function resolveByTypeOrClassName(ReflectionParameter $parameter): ?string
-    {
-        $type = $parameter->getType();
-
-        if ( !$type instanceof ReflectionNamedType ) {
-            return null;
-        }
-
-        if ( $type->isBuiltin() ) {
-            return $this->resolveFromBuiltin($parameter);
-        }
-
-        if ( $className = $this->resolveFromClass($parameter) ) {
-            return $className;
-        }
-
-        return $parameter->getName();
-    }
 
     /**
      * @param  ReflectionParameter  $param
@@ -84,66 +63,6 @@ trait ResolveParams
             return $value;
         }
         return $this->evaluateKey($parameterName);
-    }
-
-    /**
-     * @return mixed|null
-     * @throws \Exception
-     */
-    public function resolveFromBuiltin(ReflectionParameter $parameter): mixed
-    {
-        $response = [];
-
-        foreach ($this->getData() as $key => $value) {
-            if ( !is_object($value) && gettype($value) === $parameter->getType()->getName() ) {
-                $response[] = $key;
-            }
-        }
-
-        if ( count($response) > 1 ) {
-            return $this->guess($parameter, $response);
-        }
-
-        return array_pop($response);
-    }
-
-    public function resolveFromClass(ReflectionParameter $parameter): mixed
-    {
-        $response = [];
-        foreach ($this->getData() as $key => $value) {
-            if ( $key === $parameter->getType()->getName() ) {
-                $response[] = $key;
-                continue;
-            }
-            if ( is_object($value) && get_class($value) === $parameter->getType()->getName() ) {
-                $response[] = $key;
-            }
-        }
-
-        if ( count($response) > 1 ) {
-            return $this->guess($parameter, $response);
-        }
-
-        return array_pop($response);
-    }
-
-    protected function guess(ReflectionParameter $parameter, array $response): mixed
-    {
-        $highestSimilarity = 0;
-        $parameterName = $parameter->getName();
-        foreach ($response as $value) {
-            similar_text($parameterName, $value, $percent);
-            if ( $percent > $highestSimilarity ) {
-                $highestSimilarity = $percent;
-                $closestMatch = $value;
-            }
-        }
-
-        if ( !isset($closestMatch) ) {
-            throw new \Exception('Multiple values found for type ' . $parameter->getType()->getName() . ' in the capsule.');
-        }
-
-        return $closestMatch;
     }
 
 

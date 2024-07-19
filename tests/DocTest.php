@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Eloquent\Model;
 use JoeSzeto\Capsule\Capsule;
 use JoeSzeto\Capsule\Evaluable;
@@ -120,9 +121,22 @@ describe('mock', function () {
                 fn(OnBlank $name) => expect($name->getKey())->toBe('szeto')
             )->run();
     });
+
+    test('mock with sequence', function () {
+        Capsule::reset();
+        Capsule::mock(OnBlank::class, new Sequence(
+            new OnBlank('szeto'), new OnBlank('joe')
+        ));
+        capsule()
+            ->through(
+                fn(OnBlank $name) => expect($name->getKey())->toBe('szeto'),
+                fn(OnBlank $name) => expect($name->getKey())->toBe('joe')
+            )->run();
+    });
 });
 
 test('solve by app container', function () {
+    Capsule::reset();
     capsule()
         ->thenReturn(fn(WhenEmpty $empty) => expect($empty)->toBeInstanceOf(WhenEmpty::class));
 });
