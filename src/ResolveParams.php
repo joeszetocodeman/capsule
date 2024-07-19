@@ -37,7 +37,7 @@ trait ResolveParams
         }
 
         if ( filled($parameterName) ) {
-            return app()->make($parameterName);
+            return app()->make($param->getType()->getName());
         }
     }
 

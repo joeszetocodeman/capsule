@@ -1,10 +1,12 @@
 <?php
 
+use Illuminate\Database\Eloquent\Model;
 use JoeSzeto\Capsule\Capsule;
 use JoeSzeto\Capsule\Evaluable;
 use JoeSzeto\Capsule\OnBlank;
 use JoeSzeto\Capsule\SetOnBlank;
 use JoeSzeto\Capsule\Setter;
+use JoeSzeto\Capsule\WhenEmpty;
 use function JoeSzeto\Capsule\capsule;
 
 test('base usage', function () {
@@ -118,4 +120,9 @@ describe('mock', function () {
                 fn(OnBlank $name) => expect($name->getKey())->toBe('szeto')
             )->run();
     });
+});
+
+test('solve by app container', function () {
+    capsule()
+        ->thenReturn(fn(WhenEmpty $empty) => expect($empty)->toBeInstanceOf(WhenEmpty::class));
 });

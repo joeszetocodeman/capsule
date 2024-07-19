@@ -44,6 +44,16 @@ $name = capsule()
     ->thenReturn(fn(string $myName) => $myName);
 ```
 
+we can resolve parameters by the application container
+leverages the underlying container's reflection capabilities. This means that when a closure or callable object is
+executed, the Capsule library can automatically inject the required dependencies as defined by the type hints of the
+parameters.
+
+```php
+capsule()
+    ->thenReturn(fn(WhenEmpty $empty) => expect($empty)->toBeInstanceOf(WhenEmpty::class));
+```
+
 ## OnBlank
 
 it will only call when the value of the setter is null
