@@ -89,6 +89,13 @@ class Callback
 
     public function evaluate()
     {
+        if ( $this->isIterator() ) {
+            foreach ($this->getIterator() as $key => $value) {
+                $this->capsule->evaluate($this->callable, [$value]);
+            }
+            return null;
+        }
+
         if ( !$this->isSetter() ) {
             return $this->evaluated ??= $this->capsule->evaluate($this->callable);
         }
@@ -101,6 +108,16 @@ class Callback
     public function isOnly()
     {
         return $this->findAttributes(Only::class) ? true : false;
+    }
+
+    private function isIterator(): bool
+    {
+        return $this->findAttributes(Each::class) ? true : false;
+    }
+
+    private function getIterator()
+    {
+        return $this->capsule->get($this->findAttributes(Each::class)->key);
     }
 
 }

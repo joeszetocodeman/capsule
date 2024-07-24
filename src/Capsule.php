@@ -174,7 +174,7 @@ class Capsule
             $this->set($params);
         }
 
-        return $something(...$this->resolveParams($something));
+        return $something(...$this->resolveParams($something), ...$params);
     }
 
     public function call($something)

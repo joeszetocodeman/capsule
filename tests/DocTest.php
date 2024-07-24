@@ -3,6 +3,7 @@
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Eloquent\Model;
 use JoeSzeto\Capsule\Capsule;
+use JoeSzeto\Capsule\Each;
 use JoeSzeto\Capsule\Evaluable;
 use JoeSzeto\Capsule\OnBlank;
 use JoeSzeto\Capsule\Only;
@@ -159,6 +160,17 @@ test('skip', function () {
             fn() => expect(true)->toBeTrue(),
             #[Skip]
             fn() => throw new Exception('should not run'),
+        )
+        ->run();
+});
+
+test('forEach', function () {
+    capsule()
+        ->through(
+            #[Setter('items')]
+            fn() => collect(['foo', 'bar']),
+            #[Each('items')]
+            fn(string $item) => expect($item)->toBeString()
         )
         ->run();
 });
