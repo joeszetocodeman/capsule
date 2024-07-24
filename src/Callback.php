@@ -37,6 +37,10 @@ class Callback
             return $this->shouldRun;
         }
 
+        if ( $this->findAttributes(Skip::class) ) {
+            return false;
+        }
+
         return $this->shouldRun = $this->evaluateShouldRun();
     }
 
@@ -92,6 +96,11 @@ class Callback
             $this->setterKey(),
             $this->capsule->evaluate($this->callable)
         );
+    }
+
+    public function isOnly()
+    {
+        return $this->findAttributes(Only::class) ? true : false;
     }
 
 }

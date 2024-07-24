@@ -138,6 +138,30 @@ capsule()
     );
 ```
 
+### Only
+
+```php
+capsule()
+    ->through(
+        fn() => throw new Exception('should not run'),
+        #[Only]
+        fn() => expect(true)->toBeTrue()
+    )
+    ->run();
+```
+
+### Skip
+
+```php
+capsule()
+    ->through(
+        fn() => expect(true)->toBeTrue(),
+        #[Skip]
+        fn() => throw new Exception('should not run'),
+    )
+    ->run();
+```
+
 ### Mocking
 
 The Capsule::mock method allows developers to replace parts of their application's behavior with predetermined responses
@@ -181,3 +205,5 @@ capsule()
         fn(OnBlank $name) => expect($name->getKey())->toBe('joe')
     )->run();
 ```
+
+

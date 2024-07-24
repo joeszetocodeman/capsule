@@ -129,7 +129,14 @@ class Capsule
 
     public function run()
     {
+
         try {
+            foreach ($this->callbacks as $callback) {
+                if ( $callback->isOnly() ) {
+                    $this->evaluate($callback);
+                    return $this;
+                }
+            }
             foreach ($this->callbacks as $callback) {
                 if ( !$callback->shouldRun() ) {
                     continue;

@@ -5,8 +5,10 @@ use Illuminate\Database\Eloquent\Model;
 use JoeSzeto\Capsule\Capsule;
 use JoeSzeto\Capsule\Evaluable;
 use JoeSzeto\Capsule\OnBlank;
+use JoeSzeto\Capsule\Only;
 use JoeSzeto\Capsule\SetOnBlank;
 use JoeSzeto\Capsule\Setter;
+use JoeSzeto\Capsule\Skip;
 use JoeSzeto\Capsule\WhenEmpty;
 use function JoeSzeto\Capsule\capsule;
 
@@ -139,4 +141,24 @@ test('solve by app container', function () {
     Capsule::reset();
     capsule()
         ->thenReturn(fn(WhenEmpty $empty) => expect($empty)->toBeInstanceOf(WhenEmpty::class));
+});
+
+test('only', function () {
+    capsule()
+        ->through(
+            fn() => throw new Exception('should not run'),
+            #[Only]
+            fn() => expect(true)->toBeTrue()
+        )
+        ->run();
+});
+
+test('skip', function () {
+    capsule()
+        ->through(
+            fn() => expect(true)->toBeTrue(),
+            #[Skip]
+            fn() => throw new Exception('should not run'),
+        )
+        ->run();
 });
