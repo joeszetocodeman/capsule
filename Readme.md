@@ -138,6 +138,17 @@ capsule()
     );
 ```
 
+### Each
+for each value, the closure will be called
+```php
+$names = capsule()
+    ->set('names', fn() => ['szeto', 'joe'])
+    ->through(
+        #[Each('names' as: 'name')]
+        fn(string $name) => $name // 'szeto', 'joe'
+    )->run();
+```
+
 ### Only
 
 ```php
