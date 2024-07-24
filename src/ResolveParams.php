@@ -3,6 +3,7 @@
 namespace JoeSzeto\Capsule;
 
 use JoeSzeto\Capsule\ParamResolvers\Container;
+use JoeSzeto\Capsule\ParamResolvers\DefaultParams;
 use JoeSzeto\Capsule\ParamResolvers\MockName;
 use JoeSzeto\Capsule\ParamResolvers\MockType;
 use JoeSzeto\Capsule\ParamResolvers\Name;
@@ -13,6 +14,20 @@ use ReflectionFunction;
 
 trait ResolveParams
 {
+    protected array $defaultParams = [];
+
+    public function getDefaultParams(): array
+    {
+        return $this->defaultParams;
+    }
+
+    public function defaultParams(array $defaultParams)
+    {
+        $this->defaultParams = $defaultParams;
+        return $this;
+    }
+
+
     /**
      * @throws ReflectionException
      */
@@ -32,6 +47,7 @@ trait ResolveParams
         return (new Pipeline)->send($param)
             ->through(
                 [
+                    new DefaultParams($this),
                     new MockName($this),
                     new MockType($this),
                     new Name($this),

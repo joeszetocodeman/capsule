@@ -7,7 +7,7 @@ class Each
 {
     use WithCapsule;
 
-    public function __construct(public string $key)
+    public function __construct(public string $key, public string $as)
     {
     }
 }

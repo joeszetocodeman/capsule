@@ -90,8 +90,9 @@ class Callback
     public function evaluate()
     {
         if ( $this->isIterator() ) {
-            foreach ($this->getIterator() as $key => $value) {
-                $this->capsule->evaluate($this->callable, [$value]);
+            $iterator = $this->getIterator();
+            foreach ( $this->capsule->get($iterator->key) as $value) {
+                $this->capsule->evaluate($this->callable, [ $iterator->as => $value]);
             }
             return null;
         }
@@ -117,7 +118,7 @@ class Callback
 
     private function getIterator()
     {
-        return $this->capsule->get($this->findAttributes(Each::class)->key);
+        return $this->findAttributes(Each::class);
     }
 
 }

@@ -171,10 +171,10 @@ class Capsule
         }
 
         if ( $params ) {
-            $this->set($params);
+            $this->defaultParams($params);
         }
 
-        return $something(...$this->resolveParams($something), ...$params);
+        return $something(...$this->resolveParams($something));
     }
 
     public function call($something)

@@ -169,7 +169,7 @@ test('forEach', function () {
         ->through(
             #[Setter('items')]
             fn() => collect(['foo', 'bar']),
-            #[Each('items')]
+            #[Each('items', as: 'item')]
             fn(string $item) => expect($item)->toBeString()
         )
         ->run();
