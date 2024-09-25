@@ -56,8 +56,13 @@ class Capsule
 
     public function through(...$callbacks): static
     {
-        $callbacks = array_map(fn($callback) => is_callable($callback)
-            ? new Callback($callback, $this) : new Callback(fn() => $callback, $this),
+        $callbacks = array_map(function ($callback) {
+            if (is_object($callback) && method_exists($callback, '__invoke') ) {
+                $callback = \Closure::fromCallable($callback);
+            }
+            return is_callable($callback)
+                ? new Callback($callback, $this) : new Callback(fn() => $callback, $this);
+        },
             $callbacks
         );
         $this->callbacks = [...$this->callbacks, ...$callbacks];

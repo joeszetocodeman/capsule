@@ -174,3 +174,18 @@ test('forEach', function () {
         )
         ->run();
 });
+
+test('use invoke class', function () {
+    capsule()
+        ->through(
+            new class {
+                #[Setter('name')]
+                public function __invoke()
+                {
+                    return 'szeto';
+                }
+            },
+            fn(string $name) => expect($name)->toBe('szeto')
+        )
+        ->run();
+});
