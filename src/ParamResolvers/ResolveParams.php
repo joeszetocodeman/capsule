@@ -43,7 +43,7 @@ trait ResolveParams
         return $resolved;
     }
 
-    private function resolveParam(\ReflectionParameter $param)
+    public function resolveParam(\ReflectionParameter $param)
     {
         return (new Pipeline)->send($param)
             ->through(

@@ -14,15 +14,18 @@ class FromNamespace extends BaseParamResolver
 
         foreach ($this->capsuleInNamespace() as $capsule) {
             /** @var Capsule $capsule */
-            $capsule->paramsResolvers([
+            $result = $capsule->paramsResolvers([
                 DefaultParams::class,
                 MockName::class,
                 MockType::class,
                 Name::class,
                 Type::class,
-            ]);
+            ])->resolveParam($param);
+            if ( $result ) {
+                return $result;
+            }
         }
 
-        dd($param);
+        return $next($param);
     }
 }
