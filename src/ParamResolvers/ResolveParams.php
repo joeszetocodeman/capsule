@@ -1,20 +1,15 @@
 <?php
 
-namespace JoeSzeto\Capsule;
+namespace JoeSzeto\Capsule\ParamResolvers;
 
-use JoeSzeto\Capsule\ParamResolvers\Container;
-use JoeSzeto\Capsule\ParamResolvers\DefaultParams;
-use JoeSzeto\Capsule\ParamResolvers\MockName;
-use JoeSzeto\Capsule\ParamResolvers\MockType;
-use JoeSzeto\Capsule\ParamResolvers\Name;
-use JoeSzeto\Capsule\ParamResolvers\Pipeline;
-use JoeSzeto\Capsule\ParamResolvers\Type;
 use ReflectionException;
 use ReflectionFunction;
 
 trait ResolveParams
 {
     protected array $defaultParams = [];
+
+    protected array $paramsResolvers = [];
 
     public function getDefaultParams(): array
     {
@@ -24,6 +19,12 @@ trait ResolveParams
     public function defaultParams(array $defaultParams)
     {
         $this->defaultParams = $defaultParams;
+        return $this;
+    }
+
+    public function paramsResolvers(array $paramsResolvers): ResolveParams
+    {
+        $this->paramsResolvers = $paramsResolvers;
         return $this;
     }
 
@@ -46,14 +47,22 @@ trait ResolveParams
     {
         return (new Pipeline)->send($param)
             ->through(
-                [
-                    new DefaultParams($this),
-                    new MockName($this),
-                    new MockType($this),
-                    new Name($this),
-                    new Type($this),
-                    new Container($this)
-                ]
+                array_map(fn($resolver) => new $resolver($this), $this->getParamsResolvers())
             )->thenReturn();
     }
+
+    public function getParamsResolvers(): array
+    {
+        return $this->paramsResolvers ??= [
+            DefaultParams::class,
+            MockName::class,
+            MockType::class,
+            Name::class,
+            Type::class,
+            FromNamespace::class,
+            Container::class,
+        ];
+    }
+
+
 }

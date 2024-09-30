@@ -3,12 +3,12 @@
 namespace JoeSzeto\Capsule;
 
 use Illuminate\Database\Eloquent\Factories\Sequence;
-use ReflectionNamedType;
-use ReflectionParameter;
+use JoeSzeto\Capsule\Features\SupportNamespace\SupportNamespace;
+use JoeSzeto\Capsule\ParamResolvers\ResolveParams;
 
 class Capsule
 {
-    use ResolveParams, WithHalt;
+    use ResolveParams, WithHalt, SupportNamespace;
 
     private static $mocks = [];
     protected $data = [];
