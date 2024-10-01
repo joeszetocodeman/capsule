@@ -8,7 +8,7 @@ class FromNamespace extends BaseParamResolver
 {
     public function handle(\ReflectionParameter $param, \Closure $next)
     {
-        if ( !$this->capsule->hasNamespace() ) {
+        if ( !$this->capsule->underNamespace() ) {
             return $next($param);
         }
 

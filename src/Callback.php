@@ -91,8 +91,8 @@ class Callback
     {
         if ( $this->isIterator() ) {
             $iterator = $this->getIterator();
-            foreach ( $this->capsule->get($iterator->key) as $value) {
-                $this->capsule->evaluate($this->callable, [ $iterator->as => $value]);
+            foreach ($this->capsule->get($iterator->key) as $value) {
+                $this->capsule->evaluate($this->callable, [$iterator->as => $value]);
             }
             return null;
         }

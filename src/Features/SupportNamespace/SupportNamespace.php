@@ -2,6 +2,8 @@
 
 namespace JoeSzeto\Capsule\Features\SupportNamespace;
 
+use JoeSzeto\Capsule\Capsule;
+
 trait SupportNamespace
 {
     private static array $namespaces;
@@ -22,7 +24,19 @@ trait SupportNamespace
         return static::$namespaces[$namespace] ?? [];
     }
 
-    public function hasNamespace(): bool
+    /**
+     * @return Capsule[]
+     */
+    public function getOthersInSameNamespace(): array
+    {
+        $capsules = static::getCapsulesInNamespace($this->namespace);
+
+        return array_filter($capsules, function ($capsule) {
+            return $capsule !== $this;
+        });
+    }
+
+    public function underNamespace(): bool
     {
         return isset($this->namespace);
     }

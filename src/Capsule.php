@@ -3,12 +3,13 @@
 namespace JoeSzeto\Capsule;
 
 use Illuminate\Database\Eloquent\Factories\Sequence;
+use JoeSzeto\Capsule\Features\SupportAppend\SupportAppend;
 use JoeSzeto\Capsule\Features\SupportNamespace\SupportNamespace;
 use JoeSzeto\Capsule\ParamResolvers\ResolveParams;
 
 class Capsule
 {
-    use ResolveParams, WithHalt, SupportNamespace;
+    use ResolveParams, WithHalt, SupportNamespace, SupportAppend;
 
     private static $mocks = [];
     protected $data = [];
@@ -57,7 +58,7 @@ class Capsule
     public function through(...$callbacks): static
     {
         $callbacks = array_map(function ($callback) {
-            if (is_object($callback) && method_exists($callback, '__invoke') ) {
+            if ( is_object($callback) && method_exists($callback, '__invoke') ) {
                 $callback = \Closure::fromCallable($callback);
             }
             return is_callable($callback)
@@ -134,15 +135,15 @@ class Capsule
 
     public function run()
     {
-
+        $callbacks = $this->getCallbacks();
         try {
-            foreach ($this->callbacks as $callback) {
+            foreach ($callbacks as $callback) {
                 if ( $callback->isOnly() ) {
                     $this->evaluate($callback);
                     return $this;
                 }
             }
-            foreach ($this->callbacks as $callback) {
+            foreach ($callbacks as $callback) {
                 if ( !$callback->shouldRun() ) {
                     continue;
                 }
@@ -150,7 +151,7 @@ class Capsule
             }
         } catch (Halt $e) {
         } catch (\Throwable $e) {
-            foreach ($this->callbacks as $callback) {
+            foreach ($callbacks as $callback) {
                 $handled = false;
                 if ( $callback->isCatch($e) ) {
                     $handled = true;
@@ -244,6 +245,29 @@ class Capsule
         if ( $this->has($key) ) {
             throw new \Exception("Duplicate key type: $key");
         }
+    }
+
+    protected function getCallbacks()
+    {
+        $callbacks = $this->callbacks;
+
+        $appends = array_map(
+            fn($append) => new Callback($append, $this),
+            $this->getAppends()
+        );
+
+        if ( $this->underNamespace() ) {
+            foreach ($this->getOthersInSameNamespace() as $other) {
+                $appends = [
+                    ...$appends,
+                    ...array_map(
+                        fn($append) => new Callback($append, $this),
+                        $other->getAppends()
+                    )
+                ];
+            }
+        }
+        return [...$callbacks, ...$appends];
     }
 
 
