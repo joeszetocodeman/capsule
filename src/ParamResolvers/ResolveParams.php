@@ -9,7 +9,7 @@ trait ResolveParams
 {
     protected array $defaultParams = [];
 
-    protected array $paramsResolvers = [];
+    protected ?array $paramsResolvers = null;
 
     public function getDefaultParams(): array
     {
@@ -22,7 +22,7 @@ trait ResolveParams
         return $this;
     }
 
-    public function paramsResolvers(array $paramsResolvers): ResolveParams
+    public function paramsResolvers(array $paramsResolvers): static
     {
         $this->paramsResolvers = $paramsResolvers;
         return $this;
@@ -47,7 +47,9 @@ trait ResolveParams
     {
         return (new Pipeline)->send($param)
             ->through(
-                array_map(fn($resolver) => new $resolver($this), $this->getParamsResolvers())
+                array_map(function ($resolver) {
+                    return new $resolver($this);
+                }, $this->getParamsResolvers())
             )->thenReturn();
     }
 

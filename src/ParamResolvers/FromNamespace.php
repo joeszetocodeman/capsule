@@ -12,8 +12,7 @@ class FromNamespace extends BaseParamResolver
             return $next($param);
         }
 
-        foreach ($this->capsuleInNamespace() as $capsule) {
-            /** @var Capsule $capsule */
+        foreach ($this->capsulesInNamespace() as $capsule) {
             $result = $capsule->paramsResolvers([
                 DefaultParams::class,
                 MockName::class,
@@ -27,5 +26,19 @@ class FromNamespace extends BaseParamResolver
         }
 
         return $next($param);
+    }
+
+    /**
+     * @return Capsule[]
+     */
+    private function capsulesInNamespace(): array
+    {
+        /** @var string $namespace */
+        $namespace = $this->capsule->getNamespace();
+        $capsules = Capsule::getCapsulesInNamespace($namespace);
+
+        return array_filter($capsules, function ($capsule) {
+            return $capsule !== $this->capsule;
+        });
     }
 }

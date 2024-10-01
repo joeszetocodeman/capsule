@@ -17,9 +17,19 @@ trait SupportNamespace
         return $this;
     }
 
+    public static function getCapsulesInNamespace(string $namespace): array
+    {
+        return static::$namespaces[$namespace] ?? [];
+    }
+
     public function hasNamespace(): bool
     {
         return isset($this->namespace);
+    }
+
+    public function getNamespace(): ?string
+    {
+        return $this->namespace;
     }
 
 }
