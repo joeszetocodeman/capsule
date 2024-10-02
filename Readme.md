@@ -139,7 +139,9 @@ capsule()
 ```
 
 ### Each
+
 for each value, the closure will be called
+
 ```php
 $names = capsule()
     ->set('names', fn() => ['szeto', 'joe'])
@@ -215,6 +217,68 @@ capsule()
         fn(OnBlank $name) => expect($name->getKey())->toBe('szeto'),
         fn(OnBlank $name) => expect($name->getKey())->toBe('joe')
     )->run();
+```
+
+### Catch
+
+```php
+    capsule(
+        fn() => throw new Exception('foo'),
+        #[Cat(Exception::class)]
+        fn($message) => expect($message)->toBe('foo')
+    )->run();
+```
+
+### Namespace
+
+it can resolve params from namespace, capsules under same namespace can share the value
+
+```php
+    capsule()
+        ->namespace('some:namespace')
+        ->set('name', 'szeto')->run();
+
+    capsule()
+        ->namespace('some:namespace')
+        ->through(
+            fn(string $name) => expect($name)->toBe('szeto')
+        )->run();
+```
+
+### Append
+
+append function will append the callable to the end of the capsule
+
+```php
+    $capsule = capsule()->through(
+        #[Setter('name')]
+        fn() => 'szeto'
+    );
+
+    $name = $capsule->append(
+        #[Setter('name')]
+        fn($name) => 'joe ' . $name
+    )->thenReturn('name');
+
+    expect($name)->toBe('joe szeto');
+```
+
+use append combined with namespace
+
+```php
+    capsule()->namespace('abc:foo')->append(
+        #[Setter('name')]
+        fn(string $name) => 'joe ' . $name
+    );
+
+    $name = capsule()
+        ->namespace('abc:foo')
+        ->through(
+            #[Setter('name')]
+            fn() => 'szeto'
+        )->thenReturn('name');
+
+    // now name is joe szeto
 ```
 
 

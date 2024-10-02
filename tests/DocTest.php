@@ -3,6 +3,7 @@
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Eloquent\Model;
 use JoeSzeto\Capsule\Capsule;
+use JoeSzeto\Capsule\Cat;
 use JoeSzeto\Capsule\Each;
 use JoeSzeto\Capsule\Evaluable;
 use JoeSzeto\Capsule\OnBlank;
@@ -184,10 +185,18 @@ test('use invoke class', function () {
                 #[Setter('name')]
                 public function __invoke(string $name)
                 {
-                    return $name. ' szeto';
+                    return $name . ' szeto';
                 }
             },
             fn(string $name) => expect($name)->toBe('joe szeto')
         )
         ->run();
+});
+
+test('catch', function () {
+    capsule(
+        fn() => throw new Exception('foo'),
+        #[Cat(Exception::class)]
+        fn($message) => expect($message)->toBe('foo')
+    )->run();
 });
