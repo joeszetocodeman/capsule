@@ -6,22 +6,21 @@ use JoeSzeto\Capsule\Capsule;
 
 trait SupportNamespace
 {
-    private static array $namespaces;
     private string $namespace;
 
     public function namespace(string $namespace)
     {
         $this->namespace = $namespace;
 
-        static::$namespaces[$namespace] ??= [];
-        static::$namespaces[$namespace][] = $this;
+        NamespaceHolder::instance()->namespaces[$namespace] ??= [];
+        NamespaceHolder::instance()->namespaces[$namespace][] = $this;
 
         return $this;
     }
 
     public static function getCapsulesInNamespace(string $namespace): array
     {
-        return static::$namespaces[$namespace] ?? [];
+        return NamespaceHolder::instance()->namespaces[$namespace] ?? [];
     }
 
     /**
@@ -48,6 +47,6 @@ trait SupportNamespace
 
     public static function clearNamespace()
     {
-        static::$namespaces = [];
+        NamespaceHolder::instance()->namespaces = [];
     }
 }
