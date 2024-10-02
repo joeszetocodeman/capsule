@@ -46,4 +46,8 @@ trait SupportNamespace
         return $this->namespace;
     }
 
+    public static function clearNamespace()
+    {
+        static::$namespaces = [];
+    }
 }
