@@ -3,12 +3,13 @@
 namespace JoeSzeto\Capsule\ParamResolvers;
 
 use JoeSzeto\Capsule\Capsule;
+use ReflectionParameter;
 
 class FromNamespace extends BaseParamResolver
 {
     public function handle(\ReflectionParameter $param, \Closure $next)
     {
-        if ( !$this->capsule->underNamespace() ) {
+        if (!$this->capsule->underNamespace()) {
             return $next($param);
         }
 
@@ -20,7 +21,7 @@ class FromNamespace extends BaseParamResolver
                 Name::class,
                 Type::class,
             ])->resolveParam($param);
-            if ( $result ) {
+            if (!$result instanceof ReflectionParameter) {
                 return $result;
             }
         }

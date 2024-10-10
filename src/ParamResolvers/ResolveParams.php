@@ -45,7 +45,8 @@ trait ResolveParams
 
     public function resolveParam(\ReflectionParameter $param)
     {
-        return (new Pipeline)->send($param)
+        return (new Pipeline)
+            ->send($param)
             ->through(
                 array_map(function ($resolver) {
                     return new $resolver($this);

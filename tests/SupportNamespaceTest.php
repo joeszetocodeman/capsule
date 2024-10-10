@@ -23,6 +23,19 @@ it('can not resolve params from others namespace', function () {
     capsule()
         ->namespace('other:namespace')
         ->through(
-            fn(string $name) => $name
+            fn(?string $name) => expect($name)->toBeNull()
         )->run();
-})->throws(BindingResolutionException::class);
+});
+
+it('foobar', function () {
+    capsule()
+        ->namespace('foo:bar')
+        ->append(
+            fn(?bool $foo) => expect($foo)->toBeNull(),
+        );
+
+    capsule()
+        ->namespace('foo:bar')
+        ->run();
+});
+
