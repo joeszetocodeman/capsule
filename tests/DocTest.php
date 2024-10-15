@@ -13,6 +13,7 @@ use JoeSzeto\Capsule\Setter;
 use JoeSzeto\Capsule\Skip;
 use JoeSzeto\Capsule\WhenEmpty;
 use function JoeSzeto\Capsule\capsule;
+use function JoeSzeto\Capsule\massage;
 
 test('base usage', function () {
     $me = capsule(
@@ -185,7 +186,7 @@ test('use invoke class', function () {
                 #[Setter('name')]
                 public function __invoke(string $name)
                 {
-                    return $name . ' szeto';
+                    return $name.' szeto';
                 }
             },
             fn(string $name) => expect($name)->toBe('joe szeto')
@@ -200,3 +201,27 @@ test('catch', function () {
         fn($message) => expect($message)->toBe('foo')
     )->run();
 });
+
+describe('massage', function () {
+    it('return last past of namespace', function () {
+        $bob = massage('foo:bar:bob', [
+            'bob' => 'szeto'
+        ]);
+        expect($bob)->toBe('szeto');
+    });
+
+    it('return return', function () {
+        $bob = massage('foo:bar:abc', [
+            'bob' => 'szeto'
+        ], 'bob');
+        expect($bob)->toBe('szeto');
+    });
+
+    it('throw when not match', function () {
+        $bob = massage('foo:bar:abc', [
+            'bob' => 'szeto'
+        ]);
+        expect($bob)->toBe('szeto');
+    })->throws(InvalidArgumentException::class);
+});
+
