@@ -281,4 +281,46 @@ use append combined with namespace
     // now name is joe szeto
 ```
 
+### massage
 
+when we want to change the value of some variable we will always do something like the following
+
+```php
+return capsule()
+    ->namespace($namespace)
+    ->set($data)
+    ->thenReturn($return);
+```
+
+so I come up with the idea of massage
+
+```php
+return massage($namespace, $data, $return);
+```
+
+or
+
+```php
+return massage($namespace, $data);
+```
+
+but if we want to use this approach, we have to follow some conventions
+
+``` $namespace ``` = ``` someClassname:someFunction:someVariableName ```
+
+and the ``` someVariableName ``` must be the key of the data
+
+for example
+
+```php
+massage(Foo::class.':handle:name', ['name' => 'szeto']);
+```
+
+this is equivalent to
+
+```php
+capsule()
+    ->namespace(Foo::class.':handle:name')
+    ->set('name', 'szeto')
+    ->thenReturn('name');
+```
